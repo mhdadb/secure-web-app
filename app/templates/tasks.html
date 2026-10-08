@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Your tasks{% endblock %}
+{% block content %}
+<h1>Your tasks</h1>
+{% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="{{ url_for('tasks.create_task') }}" class="stack add">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <label>Title
+    <input name="title" value="{{ title or '' }}" maxlength="120" required>
+  </label>
+  <label>Notes <span class="hint">optional</span>
+    <textarea name="notes" rows="2" maxlength="500">{{ notes or '' }}</textarea>
+  </label>
+  <button type="submit">Add task</button>
+</form>
+
+{% if tasks %}
+<ul class="tasks">
+  {% for t in tasks %}
+  <li class="{{ 'done' if t['done'] else '' }}">
+    <form method="post" action="{{ url_for('tasks.toggle_task', task_id=t['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="check" aria-label="{{ 'Mark as not done' if t['done'] else 'Mark as done' }}">{{ '✓' if t['done'] else '' }}</button>
+    </form>
+    <div class="body">
+      <strong>{{ t['title'] }}</strong>
+      {% if t['notes'] %}<p>{{ t['notes'] }}</p>{% endif %}
+    </div>
+    <form method="post" action="{{ url_for('tasks.delete_task', task_id=t['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="link danger">Delete</button>
+    </form>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="empty">Nothing here yet. Add your first task above.</p>
+{% endif %}
+{% endblock %}
